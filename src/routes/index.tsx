@@ -1,29 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router";
+import ImageTool from "@/components/ImageTool";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Your App" },
-      { name: "description", content: "Replace this with a one-sentence description of your app." },
-      { property: "og:title", content: "Your App" },
-      { property: "og:description", content: "Replace this with a one-sentence description of your app." },
+      { title: "Image Compressor & Resizer — JPG, PNG, WebP Converter" },
+      { name: "description", content: "Free online tool to compress, resize, and convert images between JPG, PNG, and WebP. Drag & drop, batch processing, instant download. 100% private — runs in your browser." },
+      { property: "og:title", content: "Image Compressor & Resizer" },
+      { property: "og:description", content: "Compress, resize and convert JPG / PNG / WebP in your browser. Free, private, batch-ready." },
     ],
   }),
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
 function Index() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
-  );
+  return <ImageTool />;
 }
