@@ -225,7 +225,7 @@ export default function ImageTool() {
     const done = items.filter((i) => i.status === "done" && i.outputBlob);
     if (!done.length) return;
     if (done.length === 1) {
-      saveAs(done[0].outputBlob!, done[0].outputName);
+      saveAs(done[0].outputBlob!, done[0].outputName!);
       return;
     }
     // Multiple files: trigger sequential downloads (no zip dep needed)
@@ -381,7 +381,7 @@ export default function ImageTool() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => saveAs(i.outputBlob!, i.outputName)}
+                          onClick={() => saveAs(i.outputBlob!, i.outputName!)}
                         >
                           Save
                         </Button>
