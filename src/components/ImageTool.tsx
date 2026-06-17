@@ -1,6 +1,4 @@
 import { useCallback, useMemo, useRef, useState } from "react";
-import JSZip from "jszip";
-import { saveAs } from "file-saver";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,6 +12,17 @@ import {
 } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
+
+function saveAs(blob: Blob, name: string) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
 
 type OutputFormat = "original" | "image/jpeg" | "image/png" | "image/webp";
 
@@ -216,13 +225,14 @@ export default function ImageTool() {
     const done = items.filter((i) => i.status === "done" && i.outputBlob);
     if (!done.length) return;
     if (done.length === 1) {
-      saveAs(done[0].outputBlob!, done[0].outputName);
+      saveAs(done[0].outputBlob!, done[0].outputName!);
       return;
     }
-    const zip = new JSZip();
-    done.forEach((i) => zip.file(i.outputName!, i.outputBlob!));
-    const blob = await zip.generateAsync({ type: "blob" });
-    saveAs(blob, "optimized-images.zip");
+    // Multiple files: trigger sequential downloads (no zip dep needed)
+    for (const i of done) {
+      saveAs(i.outputBlob!, i.outputName!);
+      await new Promise((r) => setTimeout(r, 150));
+    }
   };
 
   const stats = useMemo(() => {
@@ -371,7 +381,7 @@ export default function ImageTool() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => saveAs(i.outputBlob!, i.outputName)}
+                          onClick={() => saveAs(i.outputBlob!, i.outputName!)}
                         >
                           Save
                         </Button>
