@@ -9,6 +9,7 @@ type Props = {
   label?: string;
   hint?: string;
   compact?: boolean;
+  onStart?: () => void;
   onDone?: (result?: unknown) => void;
 };
 
