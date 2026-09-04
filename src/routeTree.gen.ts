@@ -15,6 +15,7 @@ import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
 import { Route as DashboardSupportRouteImport } from './routes/dashboard.support'
 import { Route as DashboardSavedRouteImport } from './routes/dashboard.saved'
 import { Route as DashboardPlanRouteImport } from './routes/dashboard.plan'
+import { Route as DashboardLettersIdRouteImport } from './routes/dashboard.letters.$id'
 
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
@@ -46,6 +47,11 @@ const DashboardPlanRoute = DashboardPlanRouteImport.update({
   path: '/plan',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardLettersIdRoute = DashboardLettersIdRouteImport.update({
+  id: '/letters/$id',
+  path: '/letters/$id',
+  getParentRoute: () => DashboardRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -54,6 +60,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/saved': typeof DashboardSavedRoute
   '/dashboard/support': typeof DashboardSupportRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/letters/$id': typeof DashboardLettersIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -61,6 +68,7 @@ export interface FileRoutesByTo {
   '/dashboard/saved': typeof DashboardSavedRoute
   '/dashboard/support': typeof DashboardSupportRoute
   '/dashboard': typeof DashboardIndexRoute
+  '/dashboard/letters/$id': typeof DashboardLettersIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -70,6 +78,7 @@ export interface FileRoutesById {
   '/dashboard/saved': typeof DashboardSavedRoute
   '/dashboard/support': typeof DashboardSupportRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/dashboard/letters/$id': typeof DashboardLettersIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -80,6 +89,7 @@ export interface FileRouteTypes {
     | '/dashboard/saved'
     | '/dashboard/support'
     | '/dashboard/'
+    | '/dashboard/letters/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -87,6 +97,7 @@ export interface FileRouteTypes {
     | '/dashboard/saved'
     | '/dashboard/support'
     | '/dashboard'
+    | '/dashboard/letters/$id'
   id:
     | '__root__'
     | '/'
@@ -95,6 +106,7 @@ export interface FileRouteTypes {
     | '/dashboard/saved'
     | '/dashboard/support'
     | '/dashboard/'
+    | '/dashboard/letters/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -146,6 +158,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardPlanRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/letters/$id': {
+      id: '/dashboard/letters/$id'
+      path: '/letters/$id'
+      fullPath: '/dashboard/letters/$id'
+      preLoaderRoute: typeof DashboardLettersIdRouteImport
+      parentRoute: typeof DashboardRoute
+    }
   }
 }
 
@@ -154,6 +173,7 @@ interface DashboardRouteChildren {
   DashboardSavedRoute: typeof DashboardSavedRoute
   DashboardSupportRoute: typeof DashboardSupportRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
+  DashboardLettersIdRoute: typeof DashboardLettersIdRoute
 }
 
 const DashboardRouteChildren: DashboardRouteChildren = {
@@ -161,6 +181,7 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardSavedRoute: DashboardSavedRoute,
   DashboardSupportRoute: DashboardSupportRoute,
   DashboardIndexRoute: DashboardIndexRoute,
+  DashboardLettersIdRoute: DashboardLettersIdRoute,
 }
 
 const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
