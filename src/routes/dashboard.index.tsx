@@ -21,6 +21,8 @@ export const Route = createFileRoute("/dashboard/")({
 });
 
 function DashboardHome() {
+  const [processing, setProcessing] = useState(false);
+
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-8 sm:py-10">
       <header>
@@ -38,8 +40,28 @@ function DashboardHome() {
           Photograph the letter or drop a file — we detect the language automatically.
         </p>
         <div className="mt-4">
-          <UploadDropzone compact label="Drop a photo of your letter here" hint="1 free scan left this month" />
+          <UploadDropzone
+            compact
+            label="Drop a photo of your letter here"
+            hint="1 free scan left this month"
+            onStart={() => setProcessing(true)}
+            onDone={() => setProcessing(false)}
+          />
         </div>
+      </section>
+
+      <section className="relative mt-7 min-h-40 overflow-hidden rounded-2xl border border-border bg-card p-5 sm:p-6">
+        <h2 className="text-base font-semibold text-foreground">Detailed analysis</h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Your latest scan's summary, deadlines and action steps will appear here.
+        </p>
+        {processing && (
+          <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-background/80 backdrop-blur-sm">
+            <Loader2 className="size-7 animate-spin text-primary" />
+            <p className="text-sm font-medium text-foreground">Analysing your letter…</p>
+            <p className="text-xs text-muted-foreground">This usually takes a few seconds</p>
+          </div>
+        )}
       </section>
 
       <section className="mt-10">
