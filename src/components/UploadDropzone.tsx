@@ -73,6 +73,7 @@ export default function UploadDropzone({
       console.error("[ExpatMail AI] webhook upload failed", err);
       setError(err instanceof Error ? err.message : "Upload failed");
       setState("error");
+      onDone?.(undefined);
     }
   }
 
