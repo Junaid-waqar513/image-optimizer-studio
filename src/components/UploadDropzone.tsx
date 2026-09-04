@@ -3,12 +3,23 @@ import { Camera, Loader2, Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
+const WEBHOOK_URL = "https://make.com";
+
 type Props = {
   label?: string;
   hint?: string;
   compact?: boolean;
-  onDone?: () => void;
+  onDone?: (result?: unknown) => void;
 };
+
+function fileToBase64(file: File) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+}
 
 export default function UploadDropzone({
   label = "Upload or drop photo of your letter here to try for free",
@@ -17,18 +28,49 @@ export default function UploadDropzone({
   onDone,
 }: Props) {
   const [over, setOver] = useState(false);
-  const [state, setState] = useState<"idle" | "scanning" | "done">("idle");
+  const [state, setState] = useState<"idle" | "scanning" | "done" | "error">("idle");
   const [name, setName] = useState<string | null>(null);
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
-  function simulate(fileName?: string) {
-    setName(fileName ?? "letter-photo.jpg");
+  async function handleFile(file?: File | null) {
+    if (!file) return;
+    setName(file.name);
+    setError(null);
     setState("scanning");
-    if (timer.current) clearTimeout(timer.current);
-    timer.current = setTimeout(() => {
+
+    try {
+      const base64 = await fileToBase64(file);
+
+      const form = new FormData();
+      form.append("file", file, file.name);
+      form.append("filename", file.name);
+      form.append("mimeType", file.type);
+      form.append("base64", base64);
+
+      const res = await fetch(WEBHOOK_URL, { method: "POST", body: form });
+
+      const text = await res.text();
+      let json: unknown = text;
+      try {
+        json = JSON.parse(text);
+      } catch {
+        /* non-JSON response — keep raw text */
+      }
+
+      // eslint-disable-next-line no-console
+      console.log("[ExpatMail AI] webhook response", { status: res.status, body: json });
+
+      if (!res.ok) throw new Error(`Webhook returned ${res.status}`);
+
       setState("done");
-      onDone?.();
-    }, 1600);
+      onDone?.(json);
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error("[ExpatMail AI] webhook upload failed", err);
+      setError(err instanceof Error ? err.message : "Upload failed");
+      setState("error");
+    }
   }
 
   return (
@@ -41,7 +83,7 @@ export default function UploadDropzone({
       onDrop={(e) => {
         e.preventDefault();
         setOver(false);
-        simulate(e.dataTransfer.files?.[0]?.name);
+        void handleFile(e.dataTransfer.files?.[0]);
       }}
       className={cn(
         "group relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border bg-card/60 text-center transition-all",
@@ -49,6 +91,17 @@ export default function UploadDropzone({
         over && "border-primary bg-primary/5",
       )}
     >
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*,application/pdf"
+        className="hidden"
+        onChange={(e) => {
+          void handleFile(e.target.files?.[0]);
+          e.target.value = "";
+        }}
+      />
+
       <div
         className={cn(
           "flex items-center justify-center rounded-xl bg-primary/10 text-primary transition-transform group-hover:scale-105",
@@ -69,10 +122,10 @@ export default function UploadDropzone({
           </p>
           <p className="text-xs text-muted-foreground">{hint}</p>
           <div className="flex flex-wrap items-center justify-center gap-2 pt-1">
-            <Button size="sm" onClick={() => simulate()}>
+            <Button size="sm" onClick={() => inputRef.current?.click()}>
               <Upload className="size-4" /> Choose photo
             </Button>
-            <Button size="sm" variant="outline" onClick={() => simulate("camera-capture.jpg")}>
+            <Button size="sm" variant="outline" onClick={() => inputRef.current?.click()}>
               Use camera
             </Button>
           </div>
@@ -81,19 +134,27 @@ export default function UploadDropzone({
 
       {state === "scanning" && (
         <div className="space-y-2">
-          <p className="text-sm font-medium text-foreground">Reading {name}…</p>
+          <p className="text-sm font-medium text-foreground">Sending {name} for analysis…</p>
           <p className="text-xs text-muted-foreground">Detecting language and extracting deadlines</p>
         </div>
       )}
 
       {state === "done" && (
         <div className="space-y-3">
-          <p className="text-sm font-medium text-primary">Scan complete — 1 deadline found</p>
-          <p className="text-xs text-muted-foreground">
-            Demo mode: open a sample analysis to see the full breakdown.
-          </p>
+          <p className="text-sm font-medium text-primary">Analysis received — check the console for details</p>
+          <p className="text-xs text-muted-foreground">{name}</p>
           <Button size="sm" variant="outline" onClick={() => setState("idle")}>
             Scan another
+          </Button>
+        </div>
+      )}
+
+      {state === "error" && (
+        <div className="space-y-3">
+          <p className="text-sm font-medium text-destructive">Upload failed</p>
+          <p className="text-xs text-muted-foreground">{error}</p>
+          <Button size="sm" variant="outline" onClick={() => setState("idle")}>
+            Try again
           </Button>
         </div>
       )}
