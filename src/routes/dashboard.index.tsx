@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
+import { Loader2 } from "lucide-react";
 import UploadDropzone from "@/components/UploadDropzone";
 import LetterCard from "@/components/LetterCard";
 import { letters } from "@/lib/letters";
