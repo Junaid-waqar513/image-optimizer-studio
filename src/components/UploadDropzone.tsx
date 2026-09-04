@@ -40,6 +40,7 @@ export default function UploadDropzone({
     setName(file.name);
     setError(null);
     setState("scanning");
+    onStart?.();
 
     try {
       const base64 = await fileToBase64(file);
