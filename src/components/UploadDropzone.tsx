@@ -26,6 +26,7 @@ export default function UploadDropzone({
   label = "Upload or drop photo of your letter here to try for free",
   hint = "JPG, PNG, HEIC or PDF · your file never leaves this demo",
   compact = false,
+  onStart,
   onDone,
 }: Props) {
   const [over, setOver] = useState(false);
