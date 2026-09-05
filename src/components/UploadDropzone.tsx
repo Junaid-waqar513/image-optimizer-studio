@@ -13,15 +13,6 @@ type Props = {
   onDone?: (result?: unknown) => void;
 };
 
-function fileToBase64(file: File) {
-  return new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result));
-    reader.onerror = () => reject(reader.error);
-    reader.readAsDataURL(file);
-  });
-}
-
 export default function UploadDropzone({
   label = "Upload or drop photo of your letter here to try for free",
   hint = "JPG, PNG, HEIC or PDF · your file never leaves this demo",
@@ -43,34 +34,27 @@ export default function UploadDropzone({
     onStart?.();
 
     try {
-      const base64 = await fileToBase64(file);
+      const formData = new FormData();
+      formData.append("file", file);
 
-      const form = new FormData();
-      form.append("file", file, file.name);
-      form.append("filename", file.name);
-      form.append("mimeType", file.type);
-      form.append("base64", base64);
+      const response = await fetch(WEBHOOK_URL, {
+        method: "POST",
+        body: formData,
+      });
 
-      const res = await fetch(WEBHOOK_URL, { method: "POST", body: form });
+      const responseText = await response.text();
+      // eslint-disable-next-line no-console
+      console.log("[ExpatMail AI] webhook response:", responseText);
 
-      const text = await res.text();
-      let json: unknown = text;
-      try {
-        json = JSON.parse(text);
-      } catch {
-        /* non-JSON response — keep raw text */
+      if (!response.ok) {
+        throw new Error(`Webhook returned ${response.status}`);
       }
 
-      // eslint-disable-next-line no-console
-      console.log("[ExpatMail AI] webhook response", { status: res.status, body: json });
-
-      if (!res.ok) throw new Error(`Webhook returned ${res.status}`);
-
       setState("done");
-      onDone?.(json);
+      onDone?.(responseText);
     } catch (err) {
       // eslint-disable-next-line no-console
-      console.error("[ExpatMail AI] webhook upload failed", err);
+      console.error("[ExpatMail AI] webhook upload failed:", err);
       setError(err instanceof Error ? err.message : "Upload failed");
       setState("error");
       onDone?.(undefined);
