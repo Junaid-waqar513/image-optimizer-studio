@@ -13,15 +13,6 @@ type Props = {
   onDone?: (result?: unknown) => void;
 };
 
-function fileToBase64(file: File) {
-  return new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result));
-    reader.onerror = () => reject(reader.error);
-    reader.readAsDataURL(file);
-  });
-}
-
 export default function UploadDropzone({
   label = "Upload or drop photo of your letter here to try for free",
   hint = "JPG, PNG, HEIC or PDF · your file never leaves this demo",
