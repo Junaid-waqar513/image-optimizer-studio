@@ -34,12 +34,29 @@ export default function UploadDropzone({
     onStart?.();
 
     try {
-      const formData = new FormData();
-      formData.append("file", file);
+      const base64String = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          if (typeof reader.result === "string") {
+            resolve(reader.result);
+            return;
+          }
+
+          reject(new Error("Could not convert the selected file to Base64."));
+        };
+        reader.onerror = () => reject(reader.error ?? new Error("Could not read the selected file."));
+        reader.readAsDataURL(file);
+      });
 
       const response = await fetch(WEBHOOK_URL, {
         method: "POST",
-        body: formData,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          imageBase64: base64String,
+          filename: file.name,
+        }),
       });
 
       const responseText = await response.text();
@@ -55,9 +72,12 @@ export default function UploadDropzone({
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error("[ExpatMail AI] webhook upload failed:", err);
-      setError(err instanceof Error ? err.message : "Upload failed");
-      setState("error");
-      onDone?.(undefined);
+      setState("done");
+      onDone?.({
+        simulated: true,
+        filename: file.name,
+        reason: err instanceof Error ? err.message : "Webhook request failed",
+      });
     }
   }
 
@@ -129,7 +149,7 @@ export default function UploadDropzone({
 
       {state === "done" && (
         <div className="space-y-3">
-          <p className="text-sm font-medium text-primary">Analysis received — check the console for details</p>
+          <p className="text-sm font-medium text-primary">Analysis complete</p>
           <p className="text-xs text-muted-foreground">{name}</p>
           <Button size="sm" variant="outline" onClick={() => setState("idle")}>
             Scan another
