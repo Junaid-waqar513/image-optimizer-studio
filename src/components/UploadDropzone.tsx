@@ -50,34 +50,34 @@ export default function UploadDropzone({
 
       const response = await fetch(WEBHOOK_URL, {
         method: "POST",
+        mode: "cors",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           imageBase64: base64String,
-          filename: file.name,
         }),
       });
 
       const responseText = await response.text();
       // eslint-disable-next-line no-console
-      console.log("[ExpatMail AI] webhook response:", responseText);
+      console.log("[ExpatMail AI] webhook status:", response.status);
 
       if (!response.ok) {
-        throw new Error(`Webhook returned ${response.status}`);
+        throw new Error(responseText || `Webhook returned ${response.status}`);
       }
 
+      // eslint-disable-next-line no-console
+      console.log("[ExpatMail AI] webhook response:", responseText);
       setState("done");
       onDone?.(responseText);
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error("[ExpatMail AI] webhook upload failed:", err);
-      setState("done");
-      onDone?.({
-        simulated: true,
-        filename: file.name,
-        reason: err instanceof Error ? err.message : "Webhook request failed",
-      });
+      const message = err instanceof Error ? err.message : String(err);
+      setError(message);
+      setState("error");
+      onDone?.({ error: message });
     }
   }
 
@@ -158,9 +158,11 @@ export default function UploadDropzone({
       )}
 
       {state === "error" && (
-        <div className="space-y-3">
+        <div className="w-full space-y-3" role="alert" aria-live="assertive">
           <p className="text-sm font-medium text-destructive">Upload failed</p>
-          <p className="text-xs text-muted-foreground">{error}</p>
+          <p className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive">
+            {error}
+          </p>
           <Button size="sm" variant="outline" onClick={() => setState("idle")}>
             Try again
           </Button>
