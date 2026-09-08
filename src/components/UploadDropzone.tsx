@@ -3,7 +3,9 @@ import { Camera, Loader2, Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
-const WEBHOOK_URL = "https://make.com";
+// Same-origin server proxy — the browser never calls Make.com directly,
+// so no CORS policy can block the upload.
+const PROXY_URL = "/api/upload";
 
 type Props = {
   label?: string;
@@ -37,7 +39,7 @@ export default function UploadDropzone({
       const formData = new FormData();
       formData.append("file", file);
 
-      const response = await fetch(WEBHOOK_URL, {
+      const response = await fetch(PROXY_URL, {
         method: "POST",
         body: formData,
       });
