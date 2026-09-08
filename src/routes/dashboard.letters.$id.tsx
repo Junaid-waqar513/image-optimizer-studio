@@ -1,21 +1,29 @@
-import { useState } from "react";
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { createFileRoute, Link, notFound, useLocation } from "@tanstack/react-router";
 import { ArrowLeft, CalendarPlus, Send, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
-import { getLetter, statusMeta } from "@/lib/letters";
+import { getLetter, statusMeta, type Letter } from "@/lib/letters";
 
 export const Route = createFileRoute("/dashboard/letters/$id")({
   loader: ({ params }) => {
+    if (params.id === "live") {
+      return { letter: null as Letter | null, isLive: true };
+    }
     const letter = getLetter(params.id);
     if (!letter) throw notFound();
-    return { letter };
+    return { letter, isLive: false };
   },
   head: ({ loaderData }) => {
-    if (!loaderData) {
-      return { meta: [{ title: "Letter unavailable — ExpatMail AI" }, { name: "robots", content: "noindex" }] };
+    if (!loaderData || loaderData.isLive || !loaderData.letter) {
+      return {
+        meta: [
+          { title: "Live analysis — ExpatMail AI" },
+          { name: "robots", content: "noindex" },
+        ],
+      };
     }
     const { letter } = loaderData;
     const title = `${letter.sender} (${letter.kind}) — ExpatMail AI`;
@@ -33,8 +41,54 @@ export const Route = createFileRoute("/dashboard/letters/$id")({
 
 type ChatMessage = { role: "user" | "assistant"; text: string };
 
+type LiveAnalysisState = {
+  imageUrl?: string;
+  filename?: string;
+  analysis?: {
+    summary: string;
+    checklist: string[];
+    calendar_title: string;
+    calendar_date: string;
+  };
+};
+
+function buildLiveLetter(state: LiveAnalysisState): Letter {
+  const analysis = state.analysis;
+  const filename = state.filename || "Uploaded document";
+  const imageUrl =
+    state.imageUrl ||
+    "https://placehold.co/600x800/e2e8f0/64748b?text=Upload+a+letter+to+see+preview";
+
+  return {
+    id: "live",
+    sender: filename.replace(/\.[^/.]+$/, ""),
+    kind: "Scanned letter",
+    country: "Auto-detected",
+    flag: "🌍",
+    language: "Auto-detected",
+    status: "in-review",
+    dateLabel: "Just now",
+    image: imageUrl,
+    summary:
+      analysis?.summary ||
+      "Upload a document from the dashboard to see the AI-generated summary here.",
+    deadline: analysis?.calendar_date || "No deadline",
+    steps: (analysis?.checklist || []).map((label, i) => ({
+      id: `live-${i}`,
+      label,
+      done: false,
+    })),
+    calendarTitle: analysis?.calendar_title || "Follow up on uploaded letter",
+  };
+}
+
 function LetterDetail() {
-  const { letter } = Route.useLoaderData();
+  const { letter: loaderLetter, isLive } = Route.useLoaderData();
+  const location = useLocation();
+  const liveState = (location.state as LiveAnalysisState | undefined) ?? {};
+
+  const letter: Letter = isLive ? buildLiveLetter(liveState) : loaderLetter!;
+
   const status = statusMeta[letter.status];
   const [steps, setSteps] = useState(letter.steps);
   const [added, setAdded] = useState(false);
@@ -45,6 +99,14 @@ function LetterDetail() {
       text: `I've read your ${letter.language} letter from ${letter.sender}. Ask me anything — what happens if you pay late, how to appeal, or what a term means.`,
     },
   ]);
+
+  useEffect(() => {
+    return () => {
+      if (isLive && letter.image.startsWith("blob:")) {
+        URL.revokeObjectURL(letter.image);
+      }
+    };
+  }, [isLive, letter.image]);
 
   const done = steps.filter((s) => s.done).length;
 
@@ -148,7 +210,9 @@ function LetterDetail() {
               onClick={() => setAdded(true)}
             >
               <CalendarPlus className="size-4" />
-              {added ? `Added: ${letter.calendarTitle}` : "Add to Google Calendar"}
+              {added
+                ? `Added: ${letter.calendarTitle}${letter.deadline !== "No deadline" ? ` — ${letter.deadline}` : ""}`
+                : "Add to Google Calendar"}
             </Button>
           </section>
 

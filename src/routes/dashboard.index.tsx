@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
-import UploadDropzone from "@/components/UploadDropzone";
+import UploadDropzone, { type UploadResult } from "@/components/UploadDropzone";
 import LetterCard from "@/components/LetterCard";
 import { letters } from "@/lib/letters";
 
@@ -21,7 +21,23 @@ export const Route = createFileRoute("/dashboard/")({
 });
 
 function DashboardHome() {
+  const navigate = useNavigate();
   const [processing, setProcessing] = useState(false);
+
+  function handleDone(result: UploadResult | { error: string }) {
+    setProcessing(false);
+    if ("error" in result) return;
+
+    navigate({
+      to: "/dashboard/letters/$id",
+      params: { id: "live" },
+      state: {
+        imageUrl: result.imageUrl,
+        filename: result.file.name,
+        analysis: result.analysis,
+      } as Record<string, unknown>,
+    });
+  }
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-8 sm:py-10">
@@ -45,7 +61,7 @@ function DashboardHome() {
             label="Drop a photo of your letter here"
             hint="1 free scan left this month"
             onStart={() => setProcessing(true)}
-            onDone={() => setProcessing(false)}
+            onDone={handleDone}
           />
         </div>
       </section>

@@ -7,12 +7,25 @@ import { Button } from "@/components/ui/button";
 // so no CORS policy can block the upload.
 const PROXY_URL = "/api/upload";
 
+export type AnalysisResult = {
+  summary: string;
+  checklist: string[];
+  calendar_title: string;
+  calendar_date: string;
+};
+
+export type UploadResult = {
+  file: File;
+  imageUrl: string;
+  analysis: AnalysisResult;
+};
+
 type Props = {
   label?: string;
   hint?: string;
   compact?: boolean;
   onStart?: () => void;
-  onDone?: (result?: unknown) => void;
+  onDone?: (result: UploadResult | { error: string }) => void;
 };
 
 export default function UploadDropzone({
@@ -27,6 +40,25 @@ export default function UploadDropzone({
   const [name, setName] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
+
+  function parseAnalysis(text: string): AnalysisResult {
+    const cleaned = text
+      .trim()
+      .replace(/^```json\s*/i, "")
+      .replace(/^```\s*/i, "")
+      .replace(/```\s*$/i, "")
+      .trim();
+    const parsed = JSON.parse(cleaned);
+    if (!parsed.summary || !Array.isArray(parsed.checklist)) {
+      throw new Error("Webhook response missing required fields");
+    }
+    return {
+      summary: String(parsed.summary),
+      checklist: parsed.checklist.map(String),
+      calendar_title: String(parsed.calendar_title || ""),
+      calendar_date: String(parsed.calendar_date || ""),
+    };
+  }
 
   async function handleFile(file?: File | null) {
     if (!file) return;
@@ -55,8 +87,22 @@ export default function UploadDropzone({
 
       // eslint-disable-next-line no-console
       console.log("[ExpatMail AI] webhook response:", responseText);
+
+      let analysis: AnalysisResult;
+      try {
+        analysis = parseAnalysis(responseText);
+      } catch (parseErr) {
+        // eslint-disable-next-line no-console
+        console.error("[ExpatMail AI] failed to parse analysis:", parseErr);
+        throw new Error("Could not read the analysis response. Please try again.");
+      }
+
       setState("done");
-      onDone?.(responseText);
+      onDone?.({
+        file,
+        imageUrl: URL.createObjectURL(file),
+        analysis,
+      });
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error("[ExpatMail AI] webhook upload failed:", err);
