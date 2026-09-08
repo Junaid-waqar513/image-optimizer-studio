@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-const MAKE_WEBHOOK_URL = "https://make.com";
+const MAKE_WEBHOOK_URL = "https://hook.eu1.make.com/jm6t42dawoafeoqkfnctkstrww727bf6";
 
 export const Route = createFileRoute("/api/upload")({
   server: {
