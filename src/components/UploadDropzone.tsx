@@ -39,7 +39,7 @@ export default function UploadDropzone({
       const formData = new FormData();
       formData.append("file", file);
 
-      const response = await fetch(WEBHOOK_URL, {
+      const response = await fetch(PROXY_URL, {
         method: "POST",
         body: formData,
       });
