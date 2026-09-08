@@ -3,7 +3,7 @@ import { Camera, Loader2, Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
-const PROXY_URL = "/api/upload";
+const WEBHOOK_URL = "https://make.com";
 
 type Props = {
   label?: string;
@@ -34,34 +34,18 @@ export default function UploadDropzone({
     onStart?.();
 
     try {
-      const base64String = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-          if (typeof reader.result === "string") {
-            resolve(reader.result);
-            return;
-          }
+      const formData = new FormData();
+      formData.append("file", file);
 
-          reject(new Error("Could not convert the selected file to Base64."));
-        };
-        reader.onerror = () => reject(reader.error ?? new Error("Could not read the selected file."));
-        reader.readAsDataURL(file);
-      });
-
-      const response = await fetch(PROXY_URL, {
+      const response = await fetch(WEBHOOK_URL, {
         method: "POST",
-        mode: "cors",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          imageBase64: base64String,
-        }),
+        body: formData,
       });
 
-      const responseText = await response.text();
       // eslint-disable-next-line no-console
       console.log("[ExpatMail AI] webhook status:", response.status);
+
+      const responseText = await response.text();
 
       if (!response.ok) {
         throw new Error(responseText || `Webhook returned ${response.status}`);
