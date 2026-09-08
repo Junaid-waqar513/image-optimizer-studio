@@ -1,6 +1,6 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { CalendarCheck, Globe2, Languages, ShieldCheck, Sparkles } from "lucide-react";
-import UploadDropzone from "@/components/UploadDropzone";
+import UploadDropzone, { type UploadResult } from "@/components/UploadDropzone";
 import PricingCards from "@/components/PricingCards";
 import { Button } from "@/components/ui/button";
 
@@ -27,6 +27,21 @@ export const Route = createFileRoute("/")({
 const countries = ["🇺🇸 US", "🇬🇧 UK", "🇩🇪 Germany", "🇫🇷 France", "🇮🇹 Italy"];
 
 function Landing() {
+  const navigate = useNavigate();
+
+  function handleDone(result: UploadResult | { error: string }) {
+    if ("error" in result) return;
+
+    navigate({
+      to: "/dashboard/letters/live",
+      state: {
+        imageUrl: result.imageUrl,
+        filename: result.file.name,
+        analysis: result.analysis,
+      },
+    });
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-40 border-b border-border/70 bg-background/80 backdrop-blur">
@@ -68,7 +83,7 @@ function Landing() {
           </div>
 
           <div className="mx-auto mt-10 max-w-3xl">
-            <UploadDropzone />
+            <UploadDropzone onDone={handleDone} />
           </div>
 
           <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-muted-foreground">
