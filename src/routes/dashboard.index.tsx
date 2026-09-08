@@ -29,12 +29,13 @@ function DashboardHome() {
     if ("error" in result) return;
 
     navigate({
-      to: "/dashboard/letters/live",
+      to: "/dashboard/letters/$id",
+      params: { id: "live" },
       state: {
         imageUrl: result.imageUrl,
         filename: result.file.name,
         analysis: result.analysis,
-      },
+      } as Record<string, unknown>,
     });
   }
 

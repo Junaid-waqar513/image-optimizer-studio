@@ -17,7 +17,7 @@ export const Route = createFileRoute("/dashboard/letters/$id")({
     return { letter, isLive: false };
   },
   head: ({ loaderData }) => {
-    if (!loaderData || loaderData.isLive) {
+    if (!loaderData || loaderData.isLive || !loaderData.letter) {
       return {
         meta: [
           { title: "Live analysis — ExpatMail AI" },
