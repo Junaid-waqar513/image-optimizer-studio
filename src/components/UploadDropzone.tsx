@@ -48,7 +48,7 @@ export default function UploadDropzone({
         reader.readAsDataURL(file);
       });
 
-      const response = await fetch(WEBHOOK_URL, {
+      const response = await fetch(PROXY_URL, {
         method: "POST",
         mode: "cors",
         headers: {
