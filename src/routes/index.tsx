@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { CalendarCheck, Globe2, Languages, ShieldCheck, Sparkles } from "lucide-react";
 import UploadDropzone, { type UploadResult } from "@/components/UploadDropzone";
 import PricingCards from "@/components/PricingCards";
+import { LegalFooterLink } from "@/components/LegalFooter";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/")({
@@ -150,6 +151,7 @@ function Landing() {
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-4 text-xs text-muted-foreground sm:flex-row sm:px-6">
           <span>© {new Date().getFullYear()} ExpatMail AI</span>
           <span>Not legal advice — always verify with the issuing authority.</span>
+          <LegalFooterLink />
         </div>
       </footer>
     </div>

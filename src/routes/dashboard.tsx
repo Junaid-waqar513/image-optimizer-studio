@@ -1,5 +1,6 @@
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
 import { CreditCard, FolderOpen, Languages, LayoutDashboard, LifeBuoy } from "lucide-react";
+import { LegalFooterLink } from "@/components/LegalFooter";
 
 export const Route = createFileRoute("/dashboard")({
   component: DashboardLayout,
@@ -40,6 +41,10 @@ function DashboardLayout() {
             </Link>
           ))}
         </nav>
+
+        <div className="flex justify-center border-t border-border px-5 py-4 md:justify-start md:border-t-0">
+          <LegalFooterLink />
+        </div>
 
         <div className="hidden px-5 py-6 md:block">
           <div className="rounded-xl border border-border bg-background p-4">
