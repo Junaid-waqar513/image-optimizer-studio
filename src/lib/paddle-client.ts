@@ -1,45 +1,30 @@
 import { initializePaddle, type Paddle, type Environments } from "@paddle/paddle-js";
 
-/**
- * Client-side Paddle bootstrap.
- * Both values come from env vars — never hard-coded, never defaulted.
- *   VITE_PADDLE_ENVIRONMENT = live | sandbox
- *   VITE_PADDLE_CLIENT_TOKEN = live_... (or test_... on sandbox)
- * Only the *client-side* token belongs here. A Paddle API key must never
- * appear in browser code.
- */
-function readEnv() {
-  const environment = import.meta.env.VITE_PADDLE_ENVIRONMENT as string | undefined;
-  const token = import.meta.env.VITE_PADDLE_CLIENT_TOKEN as string | undefined;
-
-  if (!environment) {
-    throw new Error(
-      "VITE_PADDLE_ENVIRONMENT is not set. Set it to 'live' or 'sandbox' — refusing to guess.",
-    );
-  }
-  if (environment !== "live" && environment !== "sandbox") {
-    throw new Error(`VITE_PADDLE_ENVIRONMENT must be 'live' or 'sandbox', got '${environment}'.`);
-  }
-  if (!token) {
-    throw new Error("VITE_PADDLE_CLIENT_TOKEN is not set.");
-  }
-  if (environment === "live" && !token.startsWith("live_")) {
-    throw new Error("VITE_PADDLE_ENVIRONMENT is 'live' but VITE_PADDLE_CLIENT_TOKEN is not a live_ token.");
-  }
-
-  return { environment: environment as Environments, token };
-}
+import { getPaddleConfig } from "@/lib/paddle-config.functions";
 
 let paddlePromise: Promise<Paddle> | null = null;
 
+/**
+ * Initializes Paddle.js in the browser using the environment and client-side
+ * token supplied by the server (see paddle-config.functions.ts). Fails loudly
+ * when configuration is missing rather than defaulting to an environment.
+ */
 export function getPaddle(): Promise<Paddle> {
   if (paddlePromise) return paddlePromise;
 
-  const { environment, token } = readEnv();
+  paddlePromise = (async () => {
+    const { environment, token } = await getPaddleConfig();
 
-  paddlePromise = initializePaddle({ environment, token }).then((paddle) => {
+    const paddle = await initializePaddle({
+      environment: environment as Environments,
+      token,
+    });
+
     if (!paddle) throw new Error("Paddle.js failed to initialize.");
     return paddle;
+  })().catch((error: unknown) => {
+    paddlePromise = null;
+    throw error;
   });
 
   return paddlePromise;
