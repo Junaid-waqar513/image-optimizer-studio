@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { CalendarCheck, Globe2, Languages, ShieldCheck, Sparkles } from "lucide-react";
 import UploadDropzone, { type UploadResult } from "@/components/UploadDropzone";
-import PricingCards from "@/components/PricingCards";
+import PricingTable from "@/components/PricingTable";
 import { LegalFooterLink } from "@/components/LegalFooter";
 import { Button } from "@/components/ui/button";
 
@@ -138,7 +138,7 @@ function Landing() {
             </p>
           </div>
           <div className="mt-10">
-            <PricingCards />
+            <PricingTable />
           </div>
           <p className="mt-8 flex items-center justify-center gap-2 text-xs text-muted-foreground">
             <ShieldCheck className="size-4 text-primary" />

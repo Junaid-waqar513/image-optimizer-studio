@@ -77,7 +77,6 @@ export default function PricingTable({ customerEmail }: PricingTableProps) {
           displayMode: "overlay",
           variant: "one-page",
           successUrl: `${window.location.origin}/welcome`,
-          ...(country ? { allowedPaymentMethods: undefined } : {}),
         },
       });
     } catch (error) {
