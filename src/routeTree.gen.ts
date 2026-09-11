@@ -9,6 +9,8 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WelcomeRouteImport } from './routes/welcome'
+import { Route as PricingRouteImport } from './routes/pricing'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard.index'
@@ -18,6 +20,16 @@ import { Route as DashboardPlanRouteImport } from './routes/dashboard.plan'
 import { Route as ApiUploadRouteImport } from './routes/api/upload'
 import { Route as DashboardLettersIdRouteImport } from './routes/dashboard.letters.$id'
 
+const WelcomeRoute = WelcomeRouteImport.update({
+  id: '/welcome',
+  path: '/welcome',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PricingRoute = PricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardRoute = DashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -62,6 +74,8 @@ const DashboardLettersIdRoute = DashboardLettersIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRouteWithChildren
+  '/pricing': typeof PricingRoute
+  '/welcome': typeof WelcomeRoute
   '/api/upload': typeof ApiUploadRoute
   '/dashboard/plan': typeof DashboardPlanRoute
   '/dashboard/saved': typeof DashboardSavedRoute
@@ -71,6 +85,8 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/pricing': typeof PricingRoute
+  '/welcome': typeof WelcomeRoute
   '/api/upload': typeof ApiUploadRoute
   '/dashboard/plan': typeof DashboardPlanRoute
   '/dashboard/saved': typeof DashboardSavedRoute
@@ -82,6 +98,8 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRouteWithChildren
+  '/pricing': typeof PricingRoute
+  '/welcome': typeof WelcomeRoute
   '/api/upload': typeof ApiUploadRoute
   '/dashboard/plan': typeof DashboardPlanRoute
   '/dashboard/saved': typeof DashboardSavedRoute
@@ -94,6 +112,8 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/dashboard'
+    | '/pricing'
+    | '/welcome'
     | '/api/upload'
     | '/dashboard/plan'
     | '/dashboard/saved'
@@ -103,6 +123,8 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/pricing'
+    | '/welcome'
     | '/api/upload'
     | '/dashboard/plan'
     | '/dashboard/saved'
@@ -113,6 +135,8 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/dashboard'
+    | '/pricing'
+    | '/welcome'
     | '/api/upload'
     | '/dashboard/plan'
     | '/dashboard/saved'
@@ -124,11 +148,27 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DashboardRoute: typeof DashboardRouteWithChildren
+  PricingRoute: typeof PricingRoute
+  WelcomeRoute: typeof WelcomeRoute
   ApiUploadRoute: typeof ApiUploadRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/welcome': {
+      id: '/welcome'
+      path: '/welcome'
+      fullPath: '/welcome'
+      preLoaderRoute: typeof WelcomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pricing': {
+      id: '/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof PricingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/dashboard': {
       id: '/dashboard'
       path: '/dashboard'
@@ -211,6 +251,8 @@ const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRoute: DashboardRouteWithChildren,
+  PricingRoute: PricingRoute,
+  WelcomeRoute: WelcomeRoute,
   ApiUploadRoute: ApiUploadRoute,
 }
 export const routeTree = rootRouteImport
