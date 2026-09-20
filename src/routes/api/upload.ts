@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-const MAKE_WEBHOOK_URL = "https://hook.eu1.make.com/jm6t42dawoafeoqkfnctkstrww727bf6";
 
 export const Route = createFileRoute("/api/upload")({
   server: {
@@ -9,6 +8,13 @@ export const Route = createFileRoute("/api/upload")({
       // CORS), and this handler forwards it server-to-server to Make.com,
       // then relays the response back to the React dashboard.
       POST: async ({ request }) => {
+        // Read per request (Workers bind env at request time). Keep the URL out of git.
+        const MAKE_WEBHOOK_URL = process.env["MAKE_WEBHOOK_URL"];
+        if (!MAKE_WEBHOOK_URL) {
+          console.error("[upload-proxy] MAKE_WEBHOOK_URL is not set.");
+          return Response.json({ error: "Upload service not configured" }, { status: 500 });
+        }
+
         try {
           const contentType = request.headers.get("content-type") ?? "";
           const upstream = await fetch(MAKE_WEBHOOK_URL, {

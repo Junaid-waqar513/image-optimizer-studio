@@ -13,9 +13,14 @@ const isPlaceholder = (id: string) => id.startsWith("pri_REPLACE");
 interface PricingTableProps {
   /** Prefilled into checkout when the visitor is signed in. */
   customerEmail?: string;
+  /**
+   * The signed-in user's id (must equal users.id in Supabase). Sent to Paddle as
+   * customData.userId — the webhook uses it to know WHOSE subscription to activate.
+   */
+  userId?: string;
 }
 
-export default function PricingTable({ customerEmail }: PricingTableProps) {
+export default function PricingTable({ customerEmail, userId }: PricingTableProps) {
   const [cycle, setCycle] = useState<BillingCycle>("month");
   const [configError, setConfigError] = useState<string | null>(null);
 
@@ -68,11 +73,17 @@ export default function PricingTable({ customerEmail }: PricingTableProps) {
       return;
     }
 
+    if (!userId) {
+      // Without customData.userId the webhook can't link the payment to an account.
+      console.warn("[paddle] Opening checkout without a userId — this purchase cannot be auto-activated.");
+    }
+
     try {
       const paddle = await getPaddle();
       paddle.Checkout.open({
         items: [{ priceId, quantity: 1 }],
         ...(customerEmail ? { customer: { email: customerEmail } } : {}),
+        ...(userId ? { customData: { userId } } : {}),
         settings: {
           displayMode: "overlay",
           variant: "one-page",

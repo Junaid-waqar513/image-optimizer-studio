@@ -19,6 +19,7 @@ import { Route as DashboardSavedRouteImport } from './routes/dashboard.saved'
 import { Route as DashboardPlanRouteImport } from './routes/dashboard.plan'
 import { Route as ApiUploadRouteImport } from './routes/api/upload'
 import { Route as DashboardLettersIdRouteImport } from './routes/dashboard.letters.$id'
+import { Route as ApiWebhooksPaddleRouteImport } from './routes/api/webhooks/paddle'
 
 const WelcomeRoute = WelcomeRouteImport.update({
   id: '/welcome',
@@ -70,6 +71,11 @@ const DashboardLettersIdRoute = DashboardLettersIdRouteImport.update({
   path: '/letters/$id',
   getParentRoute: () => DashboardRoute,
 } as any)
+const ApiWebhooksPaddleRoute = ApiWebhooksPaddleRouteImport.update({
+  id: '/api/webhooks/paddle',
+  path: '/api/webhooks/paddle',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -81,6 +87,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/saved': typeof DashboardSavedRoute
   '/dashboard/support': typeof DashboardSupportRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/api/webhooks/paddle': typeof ApiWebhooksPaddleRoute
   '/dashboard/letters/$id': typeof DashboardLettersIdRoute
 }
 export interface FileRoutesByTo {
@@ -92,6 +99,7 @@ export interface FileRoutesByTo {
   '/dashboard/saved': typeof DashboardSavedRoute
   '/dashboard/support': typeof DashboardSupportRoute
   '/dashboard': typeof DashboardIndexRoute
+  '/api/webhooks/paddle': typeof ApiWebhooksPaddleRoute
   '/dashboard/letters/$id': typeof DashboardLettersIdRoute
 }
 export interface FileRoutesById {
@@ -105,6 +113,7 @@ export interface FileRoutesById {
   '/dashboard/saved': typeof DashboardSavedRoute
   '/dashboard/support': typeof DashboardSupportRoute
   '/dashboard/': typeof DashboardIndexRoute
+  '/api/webhooks/paddle': typeof ApiWebhooksPaddleRoute
   '/dashboard/letters/$id': typeof DashboardLettersIdRoute
 }
 export interface FileRouteTypes {
@@ -119,6 +128,7 @@ export interface FileRouteTypes {
     | '/dashboard/saved'
     | '/dashboard/support'
     | '/dashboard/'
+    | '/api/webhooks/paddle'
     | '/dashboard/letters/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -130,6 +140,7 @@ export interface FileRouteTypes {
     | '/dashboard/saved'
     | '/dashboard/support'
     | '/dashboard'
+    | '/api/webhooks/paddle'
     | '/dashboard/letters/$id'
   id:
     | '__root__'
@@ -142,6 +153,7 @@ export interface FileRouteTypes {
     | '/dashboard/saved'
     | '/dashboard/support'
     | '/dashboard/'
+    | '/api/webhooks/paddle'
     | '/dashboard/letters/$id'
   fileRoutesById: FileRoutesById
 }
@@ -151,6 +163,7 @@ export interface RootRouteChildren {
   PricingRoute: typeof PricingRoute
   WelcomeRoute: typeof WelcomeRoute
   ApiUploadRoute: typeof ApiUploadRoute
+  ApiWebhooksPaddleRoute: typeof ApiWebhooksPaddleRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -225,6 +238,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardLettersIdRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/api/webhooks/paddle': {
+      id: '/api/webhooks/paddle'
+      path: '/api/webhooks/paddle'
+      fullPath: '/api/webhooks/paddle'
+      preLoaderRoute: typeof ApiWebhooksPaddleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -254,6 +274,7 @@ const rootRouteChildren: RootRouteChildren = {
   PricingRoute: PricingRoute,
   WelcomeRoute: WelcomeRoute,
   ApiUploadRoute: ApiUploadRoute,
+  ApiWebhooksPaddleRoute: ApiWebhooksPaddleRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
