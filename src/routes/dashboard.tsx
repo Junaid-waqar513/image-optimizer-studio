@@ -1,6 +1,9 @@
+import { useEffect } from "react";
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
 import { CreditCard, FolderOpen, Languages, LayoutDashboard, LifeBuoy } from "lucide-react";
 import { LegalFooterLink } from "@/components/LegalFooter";
+import { useAuth } from "@/lib/auth";
+import { getSupabase } from "@/lib/supabase";
 
 export const Route = createFileRoute("/dashboard")({
   component: DashboardLayout,
@@ -14,6 +17,18 @@ const nav = [
 ] as const;
 
 function DashboardLayout() {
+  const { user, loading } = useAuth();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      window.location.assign(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
+    }
+  }, [loading, user]);
+
+  if (loading || !user) {
+    return <div className="grid min-h-screen place-items-center text-sm text-muted-foreground">Loading…</div>;
+  }
+
   return (
     <div className="min-h-screen bg-muted/40 md:flex">
       <aside className="border-b border-border bg-card md:w-64 md:shrink-0 md:border-b-0 md:border-r">
@@ -42,7 +57,17 @@ function DashboardLayout() {
           ))}
         </nav>
 
-        <div className="flex justify-center border-t border-border px-5 py-4 md:justify-start md:border-t-0">
+        <div className="flex items-center justify-center gap-4 border-t border-border px-5 py-4 md:justify-start md:border-t-0">
+          <button
+            type="button"
+            className="text-xs text-muted-foreground hover:text-foreground"
+            onClick={async () => {
+              await getSupabase().auth.signOut();
+              window.location.assign("/");
+            }}
+          >
+            Sign out
+          </button>
           <LegalFooterLink />
         </div>
 

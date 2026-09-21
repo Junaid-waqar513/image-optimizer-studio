@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { getPaddle } from "@/lib/paddle-client";
 import { tiers, type BillingCycle } from "@/lib/tiers";
 import { getVisitorCountry } from "@/lib/geo.functions";
+import { useAuth } from "@/lib/auth";
 
 const isPlaceholder = (id: string) => id.startsWith("pri_REPLACE");
 
@@ -20,7 +21,10 @@ interface PricingTableProps {
   userId?: string;
 }
 
-export default function PricingTable({ customerEmail, userId }: PricingTableProps) {
+export default function PricingTable({ customerEmail: emailProp, userId: userIdProp }: PricingTableProps) {
+  const { user, loading: authLoading } = useAuth();
+  const userId = userIdProp ?? user?.id;
+  const customerEmail = emailProp ?? user?.email ?? undefined;
   const [cycle, setCycle] = useState<BillingCycle>("month");
   const [configError, setConfigError] = useState<string | null>(null);
 
@@ -73,9 +77,12 @@ export default function PricingTable({ customerEmail, userId }: PricingTableProp
       return;
     }
 
+    if (authLoading) return;
     if (!userId) {
-      // Without customData.userId the webhook can't link the payment to an account.
-      console.warn("[paddle] Opening checkout without a userId — this purchase cannot be auto-activated.");
+      // Payment must be linked to an account, or the webhook can't activate it.
+      toast.message("Please sign in first to subscribe.");
+      window.location.assign(`/login?redirect=${encodeURIComponent(window.location.pathname)}`);
+      return;
     }
 
     try {
