@@ -24,7 +24,7 @@ export const tiers: Tier[] = [
       "Email support",
     ],
     priceId: {
-      month: "pri_01m3gy4gshxq6rv7mhpqtgwv58",
+      month: "pri_01m3xp3rcpxcgt8p2ygvexskr6",
       // TODO: replace with your Starter yearly price ID from Paddle
       year: "pri_REPLACE_STARTER_YEARLY",
     },
@@ -41,7 +41,7 @@ export const tiers: Tier[] = [
       "Priority processing",
     ],
     priceId: {
-      month: "pri_01m3gygazq2qqrcfy12762tbqn",
+      month: "pri_01m3xp88nb4yb7nz36ef5wx8te",
       // TODO: replace with your Pro yearly price ID from Paddle
       year: "pri_REPLACE_PRO_YEARLY",
     },
@@ -57,7 +57,7 @@ export const tiers: Tier[] = [
       "Custom integrations",
     ],
     priceId: {
-      month: "pri_01m3gyc1zhd9h2ef709pckhaxm",
+      month: "pri_01m3xp6fwfa2g5k7nvdffhmp7n",
       // TODO: replace with your Advanced yearly price ID from Paddle
       year: "pri_REPLACE_ADVANCED_YEARLY",
     },
